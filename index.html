@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Chess Forge - AI Trainer</title>
+    
+    <!-- Librerías CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" integrity="sha384-q94+BZtLrkL1/ohfjR8c6L+A6qzNH9R2hBLwyoAfu3i/WCvQjzL2RQJ3uNHDISdU" crossorigin="anonymous">
+    
+    <!-- Estilos Personalizados (The Chess Forge Theme) -->
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        header {
+            text-align: center;
+            margin-top: 20px;
+            border-bottom: 2px solid #d4af37; /* Dorado metálico */
+            padding-bottom: 10px;
+            width: 80%;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: #d4af37;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #a0a0a0;
+        }
+
+        .main-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            width: 100%;
+            max-width: 1400px;
+            flex-direction: column; /* Cambiado a columna para poner el banner arriba */
+            align-items: center;
+        }
+
+        #board {
+            width: 400px;
+        }
+
+        .controls {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 250px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #d4af37;
+        }
+
+        select, button {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background-color: #444;
+            border-color: #d4af37;
+        }
+
+        button.primary {
+            background-color: #d4af37;
+            color: #1a1a1a;
+            font-weight: bold;
+            border: none;
+        }
+
+        button.primary:hover {
+            background-color: #b5952f;
+        }
+
+        .status-box {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #333;
+            border-left: 4px solid #d4af37;
+        }
+
+        /* Estilos para los Asides (Barras laterales) */
+        .sidebar {
+            flex: 1; /* Para que ocupen mitad y mitad en el banner */
+            background-color: #222;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            font-size: 0.9rem;
+        }
+        .sidebar h3 {
+            color: #d4af37;
+            border-bottom: 1px solid #555;
+            padding-bottom: 8px;
+            margin-top: 0;
+            font-size: 1.1rem;
+        }
+        .sidebar ul {
+            padding-left: 0;
+            list-style: none;
+        }
+        .sidebar li {
+            margin-bottom: 15px;
+            color: #ccc;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .sidebar strong {
+            color: #e0e0e0;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            flex: 1;
+        }
+
+        /* Nuevo estilo para el Banner (Asides juntos) */
+        .banner-section {
+            display: flex;
+            width: 100%;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        /* Ajustes para móviles */
+        @media (max-width: 900px) {
+            #board {
+                width: 100%;
+                max-width: 400px;
+            }
+            .banner-section {
+                flex-direction: column;
+            }
+        }
+
+        /* Estilos para la sección de información */
+        .info-section {
+            width: 90%;
+            max-width: 800px;
+            margin: 40px 0;
+            padding: 30px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            line-height: 1.6;
+        }
+        .info-section h2 {
+            color: #d4af37;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        .info-section h3 {
+            color: #e0e0e0;
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+        .info-section ul {
+            padding-left: 20px;
+            color: #ccc;
+        }
+        .info-section li {
+            margin-bottom: 10px;
+        }
+        .info-section p {
+            color: #ccc;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 50px 20px;
+            text-align: center;
+            color: #888;
+            background-color: #222;
+            border-top: 1px solid #333;
+            width: 100%;
+        }
+
+        footer .footer-title {
+            color: #d4af37;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        /* Estilos del Carrusel */
+        .carousel-container {
+            width: 400px; /* Mismo ancho que el tablero */
+            height: 400px; /* Mismo alto que el tablero para simetría */
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            border: 1px solid #444;
+            background-color: #000;
+        }
+        .carousel-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Muestra la imagen completa sin recortar */
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        .carousel-container img.active {
+            opacity: 1;
+        }
+
+        /* Selector de Idioma */
+        .lang-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Estilos para el Tema Claro (Light Mode) */
+        body.light-theme {
+            background-color: #f4f4f4;
+            color: #222;
+        }
+        body.light-theme .controls,
+        body.light-theme .sidebar,
+        body.light-theme .info-section,
+        body.light-theme footer {
+            background-color: #ffffff;
+            border-color: #ccc;
+            color: #333;
+        }
+        body.light-theme .subtitle,
+        body.light-theme .sidebar li,
+        body.light-theme .info-section p,
+        body.light-theme .info-section ul,
+        body.light-theme footer {
+            color: #555;
+        }
+        body.light-theme .sidebar strong,
+        body.light-theme .info-section h3 {
+            color: #222;
+        }
+        body.light-theme select,
+        body.light-theme button {
+            background-color: #e0e0e0;
+            color: #333;
+            border-color: #bbb;
+        }
+        body.light-theme button:hover {
+            background-color: #d0d0d0;
+        }
+        body.light-theme button.primary {
+            background-color: #d4af37;
+            color: #1a1a1a;
+            border: none;
+        }
+        body.light-theme button.primary:hover {
+            background-color: #b5952f;
+        }
+        body.light-theme .status-box {
+            background-color: #eee;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="lang-selector">
+            <button id="themeToggle" title="Cambiar Tema">☀️</button>
+            <select id="languageSwitcher">
+                <option value="es">Español</option>
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+            </select>
+        </div>
+        <h1 data-i18n="title">The Chess Forge</h1>
+        <div class="subtitle" data-i18n="subtitle">¡Forja tu maestría en ajedrez! Entrena y desafía a nuestra IA avanzada.</div>
+    </header>
+
+    <div class="main-container">
+        <!-- Banner Superior: Partidas y Campeones -->
+        <div class="banner-section">
+            <aside class="sidebar">
+            <h3 data-i18n="legendaryGames">Partidas Legendarias</h3>
+            <ul>
+                <li>
+                    <strong data-i18n="game1Title">La Inmortal (1851)</strong>
+                    <span data-i18n="game1Desc">Anderssen vs. Kieseritzky. Sacrificio total de piezas.</span>
+                </li>
+                <li>
+                    <strong data-i18n="game2Title">La Siempreviva (1852)</strong>
+                    <span data-i18n="game2Desc">Anderssen vs. Dufresne. Belleza táctica pura.</span>
+                </li>
+                <li>
+                    <strong data-i18n="game3Title">La Partida del Siglo (1956)</strong>
+                    <span data-i18n="game3Desc">Bobby Fischer (13 años) sacrifica su dama.</span>
+                </li>
+                <li>
+                    <strong data-i18n="game4Title">La Ópera (1858)</strong>
+                    <span data-i18n="game4Desc">Paul Morphy en un palco de ópera.</span>
+                </li>
+            </ul>
+        </aside>
+
+            <aside class="sidebar">
+            <h3 data-i18n="greatChampions">Grandes Campeones</h3>
+            <ul>
+                <li>
+                    <strong>Magnus Carlsen</strong>
+                    <span data-i18n="champ1Desc">(Noruega) Campeón actual. Precisión de máquina y finales.</span>
+                </li>
+                <li>
+                    <strong>Garry Kasparov</strong>
+                    <span data-i18n="champ2Desc">(Rusia) Dominó 20 años con estilo agresivo.</span>
+                </li>
+                <li>
+                    <strong>Bobby Fischer</strong>
+                    <span data-i18n="champ3Desc">(EE.UU.) El genio que venció a la URSS en 1972.</span>
+                </li>
+                <li>
+                    <strong>José R. Capablanca</strong>
+                    <span data-i18n="champ4Desc">(Cuba) "El Mozart del Ajedrez", juego natural.</span>
+                </li>
+            </ul>
+        </aside>
+        </div>
+
+        <div class="game-area">
+            <!-- Izquierda: Carrusel de Imágenes -->
+            <div class="carousel-container">
+                <img src="imagenes/change you theme.jpg" class="active" alt="Foto 1">
+                <img src="imagenes/Contemporary Logo Design - The Chess Forge2.jpg" alt="Foto 2">
+                <img src="imagenes/Screenshot_20260110_234617_The Chess Forge.jpg" alt="Foto 3">
+                <img src="imagenes/The chess Forge 2.jpg"alt="foto 4">
+                <img src="imagenes/The chess Forge 2.jpg" alt="foto 4">
+                <img src="imagenes/themes green blue white.jpg" alt="foto 5">
+                <img src="imagenes/themes green blue white.png" alt="foto 6">
+            </div>
+
+            <!-- Centro: Tablero -->
+            <div id="board"></div>
+
+            <!-- Derecha: Panel de Control -->
+            <div class="controls">
+                <div>
+                    <label for="level" data-i18n="aiLevel">Nivel de la IA:</label>
+                    <select id="level">
+                        <option value="1" data-i18n="lvl1">Nivel 1: Novato (Aleatorio)</option>
+                        <option value="2" data-i18n="lvl2">Nivel 2: Aprendiz</option>
+                        <option value="3" data-i18n="lvl3">Nivel 3: Intermedio</option>
+                        <option value="4" data-i18n="lvl4">Nivel 4: Avanzado</option>
+                        <option value="5" data-i18n="lvl5">Nivel 5: Master (Profundidad Max)</option>
+                    </select>
+                </div>
+
+                <button id="startBtn" class="primary" data-i18n="playBtn">Jugar vs IA</button>
+                <button id="demoBtn" data-i18n="demoBtn">Ver Demo Live (Auto-Play)</button>
+                <button id="clearBtn" data-i18n="resetBtn">Reiniciar Tablero</button>
+
+                <div class="status-box">
+                    <div id="status" data-i18n="statusWaiting">Estado: Esperando...</div>
+                    <div id="pgn" style="font-size: 0.8em; margin-top:5px; color:#888;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección Educativa e Histórica -->
+    <div class="info-section">
+        <h2 data-i18n="marketingTitle">¡Conviértete en un maestro del ajedrez con The Chess Forge!</h2>
+        <p data-i18n="marketingDesc">Diseñada tanto para principiantes que quieren aprender como para jugadores que buscan un verdadero desafío, esta es tu forja personal para pulir tus habilidades.</p>
+        
+        <h3 data-i18n="featuresTitle">Características:</h3>
+        <ul>
+            <li data-i18n="[html]feat1"><strong>IA Adaptativa:</strong> Enfréntate a un oponente que se ajusta a tu nivel, desde novato hasta Gran Maestro.</li>
+            <li data-i18n="[html]feat2"><strong>Entrenamiento con Guías:</strong> Aprende a proteger tus piezas y a dominar el tablero con ayudas visuales y consejos en tiempo real.</li>
+            <li data-i18n="[html]feat3"><strong>Personalización Total:</strong> Crea una experiencia única con diferentes temas, y estilos de tableros y piezas.</li>
+            <li data-i18n="[html]feat4"><strong>Mide tu Progreso:</strong> Sigue tu evolución con un sistema de puntuación ELO y avanza en tu camino a la maestría.</li>
+        </ul>
+        <p data-i18n="marketingFooter">Cada partida es una lección. ¿Estás listo para forjar tu leyenda en el tablero? ¡Descarga The Chess Forge y empieza a jugar!</p>
+        
+        <hr style="border: 0; border-top: 1px solid #444; margin: 30px 0;">
+
+        <h2 data-i18n="aboutChess">Acerca del Ajedrez</h2>
+        
+        <h3 data-i18n="whatIsChess">¿Qué es el Ajedrez?</h3>
+        <p data-i18n="chessDesc">El ajedrez es un juego de estrategia abstracta y deporte mental para dos jugadores. Se desarrolla sobre un tablero cuadriculado de 64 casillas (8x8), donde se enfrentan dos ejércitos: las Blancas y las Negras.</p>
+        
+        <h3 data-i18n="mainObjective">Objetivo Principal</h3>
+        <p data-i18n="[html]objectiveDesc">El fin último no es capturar todas las piezas, sino dar <strong>Jaque Mate</strong> al Rey contrario. Esto ocurre cuando el Rey está bajo amenaza directa de captura y no existe ningún movimiento legal para escapar.</p>
+        
+        <h3 data-i18n="educationalValue">Valor Pedagógico</h3>
+        <ul>
+            <li data-i18n="[html]edu1"><strong>Desarrolla el Pensamiento Crítico:</strong> Obliga a evaluar múltiples posibilidades y consecuencias antes de actuar.</li>
+            <li data-i18n="[html]edu2"><strong>Fomenta la Concentración:</strong> Requiere atención sostenida y análisis profundo.</li>
+            <li data-i18n="[html]edu3"><strong>Enseña Resiliencia:</strong> Los jugadores aprenden a manejar la derrota, analizar sus errores y mejorar constantemente.</li>
+            <li data-i18n="[html]edu4"><strong>Potencia la Memoria:</strong> Se ejercita el reconocimiento de patrones y la visualización espacial.</li>
+        </ul>
+
+        <h2 data-i18n="historyTitle">Breve Historia: "El Viaje del Juego Real"</h2>
+        
+        <h3 data-i18n="origin">El Origen: Chaturanga (India, Siglo VI)</h3>
+        <p data-i18n="[html]originDesc">Todo comenzó en el valle del Indo. El antepasado más antiguo conocido es el <em>Chaturanga</em>, un juego de guerra que representaba las cuatro divisiones del ejército indio de la época: infantería (peones), caballería (caballos), elefantes (alfiles) y carros (torres), liderados por un Rey y su consejero.</p>
+        
+        <h3 data-i18n="expansion">La Expansión: Shatranj (Persia y el Mundo Árabe)</h3>
+        <p data-i18n="[html]expansionDesc">El juego viajó a Persia, donde se renombró como <em>Shatranj</em>. Cuando los árabes conquistaron Persia, adoptaron el juego con entusiasmo. A través de la expansión islámica por el norte de África, el ajedrez cruzó el Mediterráneo y entró en Europa a través de la España musulmana (Al-Ándalus) alrededor del siglo X.</p>
+        
+        <h3 data-i18n="revolution">La Revolución: El Ajedrez Moderno (Europa, Siglo XV)</h3>
+        <p data-i18n="revolutionDesc">Durante la Edad Media, el juego era lento. Sin embargo, a finales del siglo XV, probablemente en España o Italia, ocurrió una revolución: se otorgó a la Dama (que antes era una pieza débil llamada "Alferza") un poder inmenso, combinando los movimientos de la Torre y el Alfil. Esto hizo el juego mucho más rápido y dinámico.</p>
+        
+        <h3 data-i18n="digitalAge">La Era Digital</h3>
+        <p data-i18n="digitalAgeDesc">En el siglo XX, el ajedrez se profesionalizó con campeonatos mundiales. En 1997, la supercomputadora Deep Blue derrotó al campeón mundial Garry Kasparov, marcando el inicio de la era de la Inteligencia Artificial, donde máquinas y humanos colaboran para descubrir la profundidad infinita del juego.</p>
+    </div>
+
+    <footer>
+        <div class="footer-title">The Chess Forge</div>
+        &copy; <span id="year"></span> <span data-i18n="rightsReserved">Todos los derechos reservados.</span>
+    </footer>
+
+    <!-- Scripts: jQuery, Chessboard.js, Chess.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- i18next Libraries -->
+    <script src="https://unpkg.com/i18next@21.6.10/dist/umd/i18next.min.js"></script>
+    <script src="https://unpkg.com/jquery-i18next@1.2.1/jquery-i18next.min.js"></script>
+    <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.3/i18nextBrowserLanguageDetector.min.js"></script>
+
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
+
+    <script>
+        // --- Configuración de Idiomas (i18next) ---
+        const resources = {
+            es: {
+                translation: {
+                    "title": "The Chess Forge",
+                    "subtitle": "¡Forja tu maestría en ajedrez! Entrena y desafía a nuestra IA avanzada.",
+                    "legendaryGames": "Partidas Legendarias",
+                    "game1Title": "La Inmortal (1851)",
+                    "game1Desc": "Anderssen vs. Kieseritzky. Sacrificio total de piezas.",
+                    "game2Title": "La Siempreviva (1852)",
+                    "game2Desc": "Anderssen vs. Dufresne. Belleza táctica pura.",
+                    "game3Title": "La Partida del Siglo (1956)",
+                    "game3Desc": "Bobby Fischer (13 años) sacrifica su dama.",
+                    "game4Title": "La Ópera (1858)",
+                    "game4Desc": "Paul Morphy en un palco de ópera.",
+                    "greatChampions": "Grandes Campeones",
+                    "champ1Desc": "(Noruega) Campeón actual. Precisión de máquina y finales.",
+                    "champ2Desc": "(Rusia) Dominó 20 años con estilo agresivo.",
+                    "champ3Desc": "(EE.UU.) El genio que venció a la URSS en 1972.",
+                    "champ4Desc": "(Cuba) 'El Mozart del Ajedrez', juego natural.",
+                    "aiLevel": "Nivel de la IA:",
+                    "lvl1": "Nivel 1: Novato (Aleatorio)",
+                    "lvl2": "Nivel 2: Aprendiz",
+                    "lvl3": "Nivel 3: Intermedio",
+                    "lvl4": "Nivel 4: Avanzado",
+                    "lvl5": "Nivel 5: Master (Profundidad Max)",
+                    "playBtn": "Jugar vs IA",
+                    "demoBtn": "Ver Demo Live (Auto-Play)",
+                    "resetBtn": "Reiniciar Tablero",
+                    "statusWaiting": "Estado: Esperando...",
+                    "marketingTitle": "¡Conviértete en un maestro del ajedrez con The Chess Forge!",
+                    "marketingDesc": "Diseñada tanto para principiantes que quieren aprender como para jugadores que buscan un verdadero desafío, esta es tu forja personal para pulir tus habilidades.",
+                    "featuresTitle": "Características:",
+                    "feat1": "<strong>IA Adaptativa:</strong> Enfréntate a un oponente que se ajusta a tu nivel, desde novato hasta Gran Maestro.",
+                    "feat2": "<strong>Entrenamiento con Guías:</strong> Aprende a proteger tus piezas y a dominar el tablero con ayudas visuales y consejos en tiempo real.",
+                    "feat3": "<strong>Personalización Total:</strong> Crea una experiencia única con diferentes temas, y estilos de tableros y piezas.",
+                    "feat4": "<strong>Mide tu Progreso:</strong> Sigue tu evolución con un sistema de puntuación ELO y avanza en tu camino a la maestría.",
+                    "marketingFooter": "Cada partida es una lección. ¿Estás listo para forjar tu leyenda en el tablero? ¡Descarga The Chess Forge y empieza a jugar!",
+                    "aboutChess": "Acerca del Ajedrez",
+                    "whatIsChess": "¿Qué es el Ajedrez?",
+                    "chessDesc": "El ajedrez es un juego de estrategia abstracta y deporte mental para dos jugadores. Se desarrolla sobre un tablero cuadriculado de 64 casillas (8x8), donde se enfrentan dos ejércitos: las Blancas y las Negras.",
+                    "mainObjective": "Objetivo Principal",
+                    "objectiveDesc": "El fin último no es capturar todas las piezas, sino dar <strong>Jaque Mate</strong> al Rey contrario. Esto ocurre cuando el Rey está bajo amenaza directa de captura y no existe ningún movimiento legal para escapar.",
+                    "educationalValue": "Valor Pedagógico",
+                    "edu1": "<strong>Desarrolla el Pensamiento Crítico:</strong> Obliga a evaluar múltiples posibilidades y consecuencias antes de actuar.",
+                    "edu2": "<strong>Fomenta la Concentración:</strong> Requiere atención sostenida y análisis profundo.",
+                    "edu3": "<strong>Enseña Resiliencia:</strong> Los jugadores aprenden a manejar la derrota, analizar sus errores y mejorar constantemente.",
+                    "edu4": "<strong>Potencia la Memoria:</strong> Se ejercita el reconocimiento de patrones y la visualización espacial.",
+                    "historyTitle": "Breve Historia: 'El Viaje del Juego Real'",
+                    "origin": "El Origen: Chaturanga (India, Siglo VI)",
+                    "originDesc": "Todo comenzó en el valle del Indo. El antepasado más antiguo conocido es el <em>Chaturanga</em>, un juego de guerra que representaba las cuatro divisiones del ejército indio de la época: infantería (peones), caballería (caballos), elefantes (alfiles) y carros (torres), liderados por un Rey y su consejero.",
+                    "expansion": "La Expansión: Shatranj (Persia y el Mundo Árabe)",
+                    "expansionDesc": "El juego viajó a Persia, donde se renombró como <em>Shatranj</em>. Cuando los árabes conquistaron Persia, adoptaron el juego con entusiasmo. A través de la expansión islámica por el norte de África, el ajedrez cruzó el Mediterráneo y entró en Europa a través de la España musulmana (Al-Ándalus) alrededor del siglo X.",
+                    "revolution": "La Revolución: El Ajedrez Moderno (Europa, Siglo XV)",
+                    "revolutionDesc": "Durante la Edad Media, el juego era lento. Sin embargo, a finales del siglo XV, probablemente en España o Italia, ocurrió una revolución: se otorgó a la Dama (que antes era una pieza débil llamada 'Alferza') un poder inmenso, combinando los movimientos de la Torre y el Alfil. Esto hizo el juego mucho más rápido y dinámico.",
+                    "digitalAge": "La Era Digital",
+                    "digitalAgeDesc": "En el siglo XX, el ajedrez se profesionalizó con campeonatos mundiales. En 1997, la supercomputadora Deep Blue derrotó al campeón mundial Garry Kasparov, marcando el inicio de la era de la Inteligencia Artificial, donde máquinas y humanos colaboran para descubrir la profundidad infinita del juego.",
+                    "rightsReserved": "Todos los derechos reservados.",
+                    "white": "Blancas",
+                    "black": "Negras",
+                    "turn": "Turno de: {{color}}",
+                    "check": ", {{color}} están en jaque.",
+                    "checkmate": "Juego terminado, {{color}} están en jaque mate.",
+                    "draw": "Juego terminado, tablas.",
+                    "demoStatus": "Modo Demo: La IA juega contra sí misma...",
+                    "resetStatus": "Tablero reiniciado."
+                }
+            },
+            en: {
+                translation: {
+                    "title": "The Chess Forge",
+                    "subtitle": "Forge your chess mastery! Train and challenge our advanced AI.",
+                    "legendaryGames": "Legendary Games",
+                    "game1Title": "The Immortal Game (1851)",
+                    "game1Desc": "Anderssen vs. Kieseritzky. Total piece sacrifice.",
+                    "game2Title": "The Evergreen Game (1852)",
+                    "game2Desc": "Anderssen vs. Dufresne. Pure tactical beauty.",
+                    "game3Title": "Game of the Century (1956)",
+                    "game3Desc": "Bobby Fischer (13 years old) sacrifices his queen.",
+                    "game4Title": "The Opera Game (1858)",
+                    "game4Desc": "Paul Morphy in an opera box.",
+                    "greatChampions": "Great Champions",
+                    "champ1Desc": "(Norway) Current Champion. Machine precision and endgames.",
+                    "champ2Desc": "(Russia) Dominated 20 years with aggressive style.",
+                    "champ3Desc": "(USA) The genius who defeated the USSR in 1972.",
+                    "champ4Desc": "(Cuba) 'The Mozart of Chess', natural play.",
+                    "aiLevel": "AI Level:",
+                    "lvl1": "Level 1: Novice (Random)",
+                    "lvl2": "Level 2: Apprentice",
+                    "lvl3": "Level 3: Intermediate",
+                    "lvl4": "Level 4: Advanced",
+                    "lvl5": "Level 5: Master (Max Depth)",
+                    "playBtn": "Play vs AI",
+                    "demoBtn": "Watch Live Demo (Auto-Play)",
+                    "resetBtn": "Reset Board",
+                    "statusWaiting": "Status: Waiting...",
+                    "marketingTitle": "Become a Chess Master with The Chess Forge!",
+                    "marketingDesc": "Designed for both beginners who want to learn and players looking for a real challenge, this is your personal forge to polish your skills.",
+                    "featuresTitle": "Features:",
+                    "feat1": "<strong>Adaptive AI:</strong> Face an opponent that adjusts to your level, from novice to Grandmaster.",
+                    "feat2": "<strong>Guided Training:</strong> Learn to protect your pieces and dominate the board with visual aids and real-time tips.",
+                    "feat3": "<strong>Total Customization:</strong> Create a unique experience with different themes, board styles, and pieces.",
+                    "feat4": "<strong>Track Your Progress:</strong> Follow your evolution with an ELO scoring system and advance on your path to mastery.",
+                    "marketingFooter": "Every game is a lesson. Are you ready to forge your legend on the board? Download The Chess Forge and start playing!",
+                    "aboutChess": "About Chess",
+                    "whatIsChess": "What is Chess?",
+                    "chessDesc": "Chess is an abstract strategy game and mental sport for two players. It is played on a checkered board of 64 squares (8x8), where two armies face each other: White and Black.",
+                    "mainObjective": "Main Objective",
+                    "objectiveDesc": "The ultimate goal is not to capture all the pieces, but to give <strong>Checkmate</strong> to the opponent's King. This occurs when the King is under direct threat of capture and there is no legal move to escape.",
+                    "educationalValue": "Educational Value",
+                    "edu1": "<strong>Develops Critical Thinking:</strong> Forces you to evaluate multiple possibilities and consequences before acting.",
+                    "edu2": "<strong>Encourages Concentration:</strong> Requires sustained attention and deep analysis.",
+                    "edu3": "<strong>Teaches Resilience:</strong> Players learn to handle defeat, analyze their mistakes and constantly improve.",
+                    "edu4": "<strong>Enhances Memory:</strong> Exercises pattern recognition and spatial visualization.",
+                    "historyTitle": "Brief History: 'The Journey of the Royal Game'",
+                    "origin": "The Origin: Chaturanga (India, 6th Century)",
+                    "originDesc": "It all started in the Indus Valley. The oldest known ancestor is <em>Chaturanga</em>, a war game representing the four divisions of the Indian army of the time: infantry (pawns), cavalry (horses), elephants (bishops) and chariots (rooks), led by a King and his advisor.",
+                    "expansion": "The Expansion: Shatranj (Persia and the Arab World)",
+                    "expansionDesc": "The game traveled to Persia, where it was renamed <em>Shatranj</em>. When the Arabs conquered Persia, they adopted the game with enthusiasm. Through the Islamic expansion through North Africa, chess crossed the Mediterranean and entered Europe through Muslim Spain (Al-Ándalus) around the 10th century.",
+                    "revolution": "The Revolution: Modern Chess (Europe, 15th Century)",
+                    "revolutionDesc": "During the Middle Ages, the game was slow. However, at the end of the 15th century, probably in Spain or Italy, a revolution occurred: the Queen (who was previously a weak piece called 'Alferza') was given immense power, combining the movements of the Rook and the Bishop. This made the game much faster and more dynamic.",
+                    "digitalAge": "The Digital Age",
+                    "digitalAgeDesc": "In the 20th century, chess became professionalized with world championships. In 1997, the supercomputer Deep Blue defeated world champion Garry Kasparov, marking the beginning of the era of Artificial Intelligence, where machines and humans collaborate to discover the infinite depth of the game.",
+                    "rightsReserved": "All rights reserved.",
+                    "white": "White",
+                    "black": "Black",
+                    "turn": "Turn: {{color}}",
+                    "check": ", {{color}} is in check.",
+                    "checkmate": "Game over, {{color}} is in checkmate.",
+                    "draw": "Game over, drawn position.",
+                    "demoStatus": "Demo Mode: AI playing against itself...",
+                    "resetStatus": "Board reset."
+                }
+            },
+            fr: {
+                translation: {
+                    "title": "The Chess Forge",
+                    "subtitle": "Forgez votre maîtrise des échecs ! Entraînez-vous et défiez notre IA avancée.",
+                    "legendaryGames": "Parties Légendaires",
+                    "game1Title": "L'Immortelle (1851)",
+                    "game1Desc": "Anderssen vs. Kieseritzky. Sacrifice total des pièces.",
+                    "game2Title": "La Toujours Jeune (1852)",
+                    "game2Desc": "Anderssen vs. Dufresne. Beauté tactique pure.",
+                    "game3Title": "La Partie du Siècle (1956)",
+                    "game3Desc": "Bobby Fischer (13 ans) sacrifie sa dame.",
+                    "game4Title": "La Partie de l'Opéra (1858)",
+                    "game4Desc": "Paul Morphy dans une loge d'opéra.",
+                    "greatChampions": "Grands Champions",
+                    "champ1Desc": "(Norvège) Champion actuel. Précision de machine et finales.",
+                    "champ2Desc": "(Russie) A dominé 20 ans avec un style agressif.",
+                    "champ3Desc": "(USA) Le génie qui a vaincu l'URSS en 1972.",
+                    "champ4Desc": "(Cuba) 'Le Mozart des Échecs', jeu naturel.",
+                    "aiLevel": "Niveau de l'IA :",
+                    "lvl1": "Niveau 1 : Novice (Aléatoire)",
+                    "lvl2": "Niveau 2 : Apprenti",
+                    "lvl3": "Niveau 3 : Intermédiaire",
+                    "lvl4": "Niveau 4 : Avancé",
+                    "lvl5": "Niveau 5 : Maître (Profondeur Max)",
+                    "playBtn": "Jouer vs IA",
+                    "demoBtn": "Voir Démo Live (Auto-Play)",
+                    "resetBtn": "Réinitialiser l'Échiquier",
+                    "statusWaiting": "État : En attente...",
+                    "marketingTitle": "Devenez un maître des échecs avec The Chess Forge !",
+                    "marketingDesc": "Conçu pour les débutants qui veulent apprendre et les joueurs cherchant un vrai défi.",
+                    "featuresTitle": "Caractéristiques :",
+                    "feat1": "<strong>IA Adaptative :</strong> Affrontez un adversaire qui s'ajuste à votre niveau.",
+                    "feat2": "<strong>Entraînement Guidé :</strong> Apprenez à protéger vos pièces.",
+                    "feat3": "<strong>Personnalisation Totale :</strong> Créez une expérience unique.",
+                    "feat4": "<strong>Mesurez vos Progrès :</strong> Suivez votre évolution avec le système ELO.",
+                    "marketingFooter": "Chaque partie est une leçon. Prêt à forger votre légende ?",
+                    "aboutChess": "À propos des Échecs",
+                    "whatIsChess": "Qu'est-ce que les Échecs ?",
+                    "chessDesc": "Les échecs sont un jeu de stratégie abstrait et un sport mental pour deux joueurs.",
+                    "mainObjective": "Objectif Principal",
+                    "objectiveDesc": "Le but ultime est de faire <strong>Échec et Mat</strong> au Roi adverse.",
+                    "educationalValue": "Valeur Pédagogique",
+                    "edu1": "<strong>Développe l'Esprit Critique :</strong> Oblige à évaluer plusieurs possibilités.",
+                    "edu2": "<strong>Favorise la Concentration :</strong> Nécessite une attention soutenue.",
+                    "edu3": "<strong>Enseigne la Résilience :</strong> Apprendre à gérer la défaite.",
+                    "edu4": "<strong>Améliore la Mémoire :</strong> Reconnaissance des motifs.",
+                    "historyTitle": "Brève Histoire",
+                    "origin": "L'Origine : Chaturanga (Inde, VIe siècle)",
+                    "originDesc": "Tout a commencé dans la vallée de l'Indus avec le Chaturanga.",
+                    "expansion": "L'Expansion : Shatranj (Perse et Monde Arabe)",
+                    "expansionDesc": "Le jeu a voyagé en Perse, renommé Shatranj.",
+                    "revolution": "La Révolution : Les Échecs Modernes (Europe, XVe siècle)",
+                    "revolutionDesc": "La Dame a reçu un pouvoir immense, rendant le jeu plus rapide.",
+                    "digitalAge": "L'Ère Numérique",
+                    "digitalAgeDesc": "Deep Blue a vaincu Kasparov, marquant le début de l'IA.",
+                    "rightsReserved": "Tous droits réservés.",
+                    "white": "Blancs",
+                    "black": "Noirs",
+                    "turn": "Tour des : {{color}}",
+                    "check": ", {{color}} sont en échec.",
+                    "checkmate": "Jeu terminé, {{color}} sont échec et mat.",
+                    "draw": "Jeu terminé, match nul.",
+                    "demoStatus": "Mode Démo : L'IA joue contre elle-même...",
+                    "resetStatus": "Échiquier réinitialisé."
+                }
+            }
+        };
+
+        // Inicializar i18next
+        i18next
+            .use(i18nextBrowserLanguageDetector)
+            .init({
+                resources: resources,
+                fallbackLng: 'es',
+                debug: false
+            }, function(err, t) {
+                // Inicializar jquery-i18next
+                jqueryI18next.init(i18next, $, { useOptionsAttr: true });
+                
+                // Traducir todo el cuerpo
+                $('body').localize();
+
+                // Evento para cambiar idioma
+                $('#languageSwitcher').change(function() {
+                    var chosenLng = $(this).val();
+                    i18next.changeLanguage(chosenLng, function() {
+                        $('body').localize();
+                        updateStatus(); // Actualizar textos dinámicos
+                    });
+                });
+
+                // Establecer el selector al idioma detectado
+                $('#languageSwitcher').val(i18next.language.split('-')[0]);
+            });
+
+        // --- Configuración Inicial ---
+        var board = null;
+        var game = new Chess();
+        var $status = $('#status');
+        var $pgn = $('#pgn');
+        var isDemoMode = false;
+        var demoInterval = null;
+
+        // --- Lógica de la IA (Simplificada para Demo Web) ---
+        // Nota: Para un nivel Master real (ELO 2800+), se necesitaría integrar Stockfish.js.
+        // Aquí simulamos niveles usando aleatoriedad y evaluación básica de material.
+
+        function makeBestMove() {
+            if (game.game_over()) return;
+
+            var level = parseInt($('#level').val());
+            var possibleMoves = game.moves();
+
+            // Game over
+            if (possibleMoves.length === 0) return;
+
+            var moveIdx = 0;
+
+            // Lógica básica de niveles
+            if (level === 1) {
+                // Nivel 1: Completamente aleatorio
+                moveIdx = Math.floor(Math.random() * possibleMoves.length);
+            } else {
+                // Niveles 2-5: Intentamos capturar piezas si es posible (Lógica voraz simple)
+                // Cuanto mayor el nivel, más probabilidad de elegir una captura sobre un movimiento aleatorio
+                var captureMoves = game.moves({ verbose: true }).filter(m => m.flags.includes('c') || m.flags.includes('e'));
+                
+                var useSmartMove = Math.random() < (level * 0.2); // 20%, 40%, 60%, 80%, 100% probabilidad
+
+                if (useSmartMove && captureMoves.length > 0) {
+                    // Elegir una captura aleatoria
+                    var randomCapture = captureMoves[Math.floor(Math.random() * captureMoves.length)];
+                    game.move(randomCapture.san);
+                    board.position(game.fen());
+                    updateStatus();
+                    return;
+                } else {
+                    moveIdx = Math.floor(Math.random() * possibleMoves.length);
+                }
+            }
+
+            game.move(possibleMoves[moveIdx]);
+            board.position(game.fen());
+            updateStatus();
+        }
+
+        // --- Configuración del Tablero ---
+        function onDragStart (source, piece, position, orientation) {
+            // No permitir mover piezas si el juego terminó o es turno de la IA o estamos en Demo
+            if (game.game_over() || isDemoMode) return false;
+            if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+                (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+                return false;
+            }
+        }
+
+        function onDrop (source, target) {
+            // Intentar mover
+            var move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // Promover siempre a reina por simplicidad
+            });
+
+            // Movimiento ilegal
+            if (move === null) return 'snapback';
+
+            updateStatus();
+
+            // Turno de la IA con un pequeño retraso para realismo
+            window.setTimeout(makeBestMove, 250);
+        }
+
+        function onSnapEnd () {
+            board.position(game.fen());
+        }
+
+        function updateStatus () {
+            var status = '';
+            var colorKey = game.turn() === 'w' ? 'white' : 'black';
+
+            if (game.in_checkmate()) {
+                status = i18next.t('checkmate', { color: i18next.t(colorKey) });
+            } else if (game.in_draw()) {
+                status = i18next.t('draw');
+            } else {
+                status = i18next.t('turn', { color: i18next.t(colorKey) });
+                if (game.in_check()) {
+                    status += i18next.t('check', { color: i18next.t(colorKey) });
+                }
+            }
+
+            $status.html(status);
+            $pgn.html(game.pgn());
+        }
+
+        var config = {
+            draggable: true,
+            position: 'start',
+            onDragStart: onDragStart,
+            onDrop: onDrop,
+            onSnapEnd: onSnapEnd,
+            pieceTheme: 'https://cdn.jsdelivr.net/gh/lichess-org/lila@master/public/piece/fantasy/{piece}.svg'
+        };
+
+        board = Chessboard('board', config);
+
+        // --- Funciones de Control ---
+
+        // 1. Iniciar Juego vs IA
+        $('#startBtn').on('click', function() {
+            stopDemo();
+            game.reset();
+            board.start();
+            updateStatus();
+            isDemoMode = false;
+        });
+
+        // 2. Modo Demo Live (Auto-Play)
+        $('#demoBtn').on('click', function() {
+            stopDemo(); // Limpiar cualquier demo anterior
+            game.reset();
+            board.start();
+            isDemoMode = true;
+            $status.html(i18next.t('demoStatus'));
+            
+            // Ejecutar movimientos automáticos cada 800ms
+            demoInterval = setInterval(function() {
+                if (game.game_over()) {
+                    stopDemo();
+                    return;
+                }
+                
+                var possibleMoves = game.moves();
+                var randomIdx = Math.floor(Math.random() * possibleMoves.length);
+                game.move(possibleMoves[randomIdx]);
+                board.position(game.fen());
+                
+            }, 800);
+        });
+
+        // 3. Limpiar / Parar
+        $('#clearBtn').on('click', function() {
+            stopDemo();
+            game.reset();
+            board.clear();
+            board.start();
+            $status.html(i18next.t('resetStatus'));
+            $pgn.html("");
+        });
+
+        function stopDemo() {
+            if (demoInterval) {
+                clearInterval(demoInterval);
+                demoInterval = null;
+            }
+            isDemoMode = false;
+        }
+
+        updateStatus();
+
+        // Actualizar año automáticamente en el footer
+        $('#year').text(new Date().getFullYear());
+
+        // --- Lógica del Carrusel ---
+        let slideIndex = 0;
+        const slides = document.querySelectorAll('.carousel-container img');
+
+        function showSlides() {
+            if (slides.length === 0) return;
+            slides.forEach(img => img.classList.remove('active'));
+            slideIndex = (slideIndex + 1) % slides.length;
+            slides[slideIndex].classList.add('active');
+        }
+        
+        // Cambiar imagen cada 3.5 segundos
+        if (slides.length > 0) setInterval(showSlides, 3500);
+
+        // --- Lógica del Tema (Claro/Oscuro) ---
+        $('#themeToggle').on('click', function() {
+            $('body').toggleClass('light-theme');
+            const isLight = $('body').hasClass('light-theme');
+            $(this).text(isLight ? '🌙' : '☀️');
+        });
+    </script>
+</body>
+</html>
