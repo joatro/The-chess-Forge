@@ -342,3 +342,48 @@ body.light-theme .status-box {
     background-color: #eee;
     color: #333;
 }
+
+/* Estilos para la sección de Descarga APK */
+.download-container {
+    text-align: center;
+    margin-top: 25px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.download-btn {
+    display: inline-block;
+    background-color: #28a745; /* Verde éxito */
+    color: white;
+    padding: 12px 25px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 50px;
+    transition: transform 0.2s, background-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.download-btn:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    color: white;
+}
+
+.download-btn .icon {
+    margin-right: 8px;
+}
+
+.small-info {
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+/* Estilos para iframes (Responsive) */
+.info-section iframe {
+    max-width: 100%;
+}

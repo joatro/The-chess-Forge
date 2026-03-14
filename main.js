@@ -56,7 +56,6 @@ const resources = {
             "digitalAge": "La Era Digital",
             "digitalAgeDesc": "En el siglo XX, el ajedrez se profesionalizó con campeonatos mundiales. En 1997, la supercomputadora Deep Blue derrotó al campeón mundial Garry Kasparov, marcando el inicio de la era de la Inteligencia Artificial, donde máquinas y humanos colaboran para descubrir la profundidad infinita del juego.",
             "rightsReserved": "Todos los derechos reservados.",
-            "invadersPrivacy": "InvadersPlay Política de Privacidad",
             "white": "Blancas",
             "black": "Negras",
             "turn": "Turno de: {{color}}",
@@ -66,7 +65,11 @@ const resources = {
             "demoStatus": "Modo Demo: La IA juega contra sí misma...",
             "resetStatus": "Tablero reiniciado.",
             "videoSectionTitle": "Videos",
-            "video1Title": "Trailer de The Chess Forge"
+            "video1Title": "Trailer de The Chess Forge",
+            "downloadTitle": "Descargar App Premium (Android)",
+            "downloadDesc": "Lleva The Chess Forge contigo. La versión APK incluye funciones exclusivas, mayor rendimiento y cero publicidad.",
+            "downloadBtn": "Descargar APK (Versión de Pago)",
+            "paymentInfo": "* Nota: Esta es una versión de pago. Tu contribución apoya futuras actualizaciones."
         }
     },
     en: {
@@ -125,7 +128,6 @@ const resources = {
             "digitalAge": "The Digital Age",
             "digitalAgeDesc": "In the 20th century, chess became professionalized with world championships. In 1997, the supercomputer Deep Blue defeated world champion Garry Kasparov, marking the beginning of the era of Artificial Intelligence, where machines and humans collaborate to discover the infinite depth of the game.",
             "rightsReserved": "All rights reserved.",
-            "invadersPrivacy": "InvadersPlay Privacy Policy",
             "white": "White",
             "black": "Black",
             "turn": "Turn: {{color}}",
@@ -135,7 +137,11 @@ const resources = {
             "demoStatus": "Demo Mode: AI playing against itself...",
             "resetStatus": "Board reset.",
             "videoSectionTitle": "Videos",
-            "video1Title": "The Chess Forge Trailer"
+            "video1Title": "The Chess Forge Trailer",
+            "downloadTitle": "Download Premium App (Android)",
+            "downloadDesc": "Take The Chess Forge with you. The APK version includes exclusive features, better performance, and zero ads.",
+            "downloadBtn": "Download APK (Paid Version)",
+            "paymentInfo": "* Note: This is a paid version. Your contribution supports future updates."
         }
     },
     fr: {
@@ -194,7 +200,6 @@ const resources = {
             "digitalAge": "L'Ère Numérique",
             "digitalAgeDesc": "Deep Blue a vaincu Kasparov, marquant le début de l'IA.",
             "rightsReserved": "Tous droits réservés.",
-            "invadersPrivacy": "Politique de confidentialité InvadersPlay",
             "white": "Blancs",
             "black": "Noirs",
             "turn": "Tour des : {{color}}",
@@ -204,7 +209,11 @@ const resources = {
             "demoStatus": "Mode Démo : L'IA joue contre elle-même...",
             "resetStatus": "Échiquier réinitialisé.",
             "videoSectionTitle": "Vidéos",
-            "video1Title": "Bande-annonce de The Chess Forge"
+            "video1Title": "Bande-annonce de The Chess Forge",
+            "downloadTitle": "Télécharger l'App Premium (Android)",
+            "downloadDesc": "Emportez The Chess Forge avec vous. La version APK inclut des fonctionnalités exclusives et aucune publicité.",
+            "downloadBtn": "Télécharger l'APK (Version Payante)",
+            "paymentInfo": "* Note : Ceci est une version payante. Votre contribution soutient les futures mises à jour."
         }
     }
 };
